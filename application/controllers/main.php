@@ -2766,6 +2766,7 @@
 		}
 	}
 
+	// PRINT DR
 	function print_dr_pdf(){
 		$data['page_title'] = 'Delivery Receipt';
 		$data['print'] = $this->usermodel->dr_print_layout();
