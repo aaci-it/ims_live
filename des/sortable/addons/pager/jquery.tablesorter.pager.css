@@ -1,0 +1,28 @@
+div.pager {
+	width : 960px;
+	margin: auto;
+	text-align: center;
+}
+div.pager span {
+	padding: 0 5px 0 5px;
+}
+div.pager input.prev {
+	width: auto;
+	margin-right: 10px;
+}
+div.pager input.next {
+	width: auto;
+	margin-left: 10px;
+}
+div.pager input {
+	font-size: 10px;
+	width: 50px;
+	border: 1px solid #330000;
+	text-align: center;
+}
+
+div.pager{
+	width : 960px;
+	margin: auto;
+}
+  

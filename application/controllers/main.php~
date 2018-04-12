@@ -1,0 +1,1316 @@
+<?php class Main extends CI_Controller{
+//USER
+	function index(){
+		if($this->session->userdata('logged_in')){
+			redirect('main/home');
+		}
+		else{
+			$this->form_validation->set_rules('uname','Username','required');
+			$this->form_validation->set_rules('pword','Password','required');
+			if($this->form_validation->run() == false){
+				$this->load->view('login');
+			}
+			else{
+				$q = $this->usermodel->login_validation();
+				if($q){
+					$data =array(
+						'logged_in' => true,
+						'usr_uname' => $this->input->post('uname'),
+						'user_lvl' => $q
+					);
+					$this->session->set_userdata($data);
+					redirect('main/home');
+				}
+				else{
+					$data['error']='Username or Password incorrect';
+					$this->load->view('login',$data);
+				}
+			}
+		}
+	}
+	function register(){
+		$data['reg_result'] = NULL;
+		if($this->input->post('go')){
+			$this->load->model('acl_model');
+			$data['reg_result'] = $this->acl_model->register(); 
+		}
+		$this->load->view('register', $data);
+	}
+	function forgot_password(){
+		$data['reset'] = NULL;
+		if($this->input->post('go')){
+			$this->load->model('acl_model');
+			$data['reset'] = $this->acl_model->forgot_password(); 
+		}
+		$this->load->view('forgot_password', $data);
+	}
+	
+	function change_password(){
+		$data['reset'] = NULL;
+		if($this->input->post('go')){
+			$this->load->model('acl_model');
+			$data['reset'] = $this->acl_model->change_password(); 
+		}
+		$this->load->view('change_password', $data);
+	}
+	
+	function logout(){
+		$this->session->sess_destroy('userdata');
+		redirect('main');
+	}
+//master data
+	function businesspartner_list(){
+		if($this->session->userdata('logged_in')){
+			$data = array();
+			$data['user'] =$this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['records']=$this->usermodel->bp_list();
+			$this->load->view('masterdata/bp_list',$data);
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function businesspartner_create(){
+		if($this->session->userdata('logged_in')){
+			$data = array();
+			$data['user'] =$this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$this->form_validation->set_rules('bpname','Name','required');
+			$this->form_validation->set_rules('bpcode','Code','required');
+			if ($this->form_validation->run()==false){
+				$this->load->view('masterdata/bp_create',$data);
+			}
+			else{
+				if($q=$this->usermodel->bp_code_validate()){
+					$data['duplicate']= 'Duplicate Code';
+					$this->load->view('masterdata/bp_create',$data);
+				}
+				elseif($q=$this->usermodel->bp_name_validate()){
+					$data['duplicate']='Duplicate Name';
+					$this->load->view('masterdata/bp_create',$data);
+				}
+				else{
+					$this->usermodel->bp_create();
+					redirect('main/businesspartner_list');
+				}
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function businesspartner_edit(){
+		if($this->session->userdata('logged_in')){
+			$data = array();
+			$data['user']=$this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['records']=$this->usermodel->records_get();
+			$this->form_validation->set_rules('bpname','Name','required');
+			if($this->form_validation->run()==false){
+				$this->load->view('masterdata/bp_edit',$data);
+			}
+			else{
+				if($q=$this->usermodel->bp_name_validate()){
+					$data['duplicate']='Duplicate Name: '.$this->input->post('bpname');
+					$this->load->view('masterdata/bp_edit',$data);
+				}
+				elseif ($q=$this->usermodel->bp_edit_code_validate()){
+					$data['duplicate']='Duplicate Code: '.$this->input->post('bpcode');
+					$this->load->view('masterdata/bp_edit',$data);
+				}
+				else{
+					$this->usermodel->bp_edit();
+					redirect('main/businesspartner_list');
+				}
+			}
+		}
+	}
+	//*
+	function businesspartner_add_item(){
+		if($this->session->userdata('logged_in')){
+			$tokens = explode('/', current_url());
+			$get = $tokens[sizeof($tokens)-1];
+			$data=array();
+			$data['user']=$this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['records']=$this->usermodel->records_get();
+			$this->form_validation->set_rules('bpcode','Code','required');
+			$this->form_validation->set_rules('bpitem','Item','required');
+			if($this->form_validation->run()==false){
+				$data['bpitem']=$this->usermodel->bp_list_item();
+				$data['item']=$this->usermodel->item_get();
+				$this->load->view('masterdata/bp_add_item',$data);
+			}
+			else{
+				if($q=$this->usermodel->bp_item_validation()){
+					redirect('main/businesspartner_add_item/'.$get);
+				}
+				else{
+					$this->usermodel->bp_add_item();
+					redirect('main/businesspartner_add_item/'.$get);
+				}
+			}
+		}
+	}
+	function businesspartner_remove_item(){
+		if($this->session->userdata('logged_in')){
+			$tokens = explode('/', current_url());
+			$get = $tokens[sizeof($tokens)-2];
+			$data=array();
+			$data['user']=$this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['records']=$this->usermodel->records_get();
+			$this->usermodel->bp_remove_item();
+			redirect('main/businesspartner_add_item/'.$get);
+		}
+	}
+	function item_list(){
+		if($this->session->userdata('logged_in')){
+			$data['user']=$this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['records']=$this->usermodel->item_list();
+			$this->load->view('masterdata/itm_list',$data);
+		}
+		else{
+			redirect('main');
+		}		
+	}
+	function item_create(){
+		if($this->session->userdata('logged_in')){
+			$data['user'] =$this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$this->form_validation->set_rules('icode','Code','required');
+			$this->form_validation->set_rules('iname','Name','required');
+			if ($this->form_validation->run() == false){
+				$this->load->view('masterdata/itm_create',$data);
+			}
+			else{
+				if($q=$this->usermodel->item_code_validation()){
+					$data['duplicate']='Duplicate Code';
+					$this->load->view('masterdata/itm_create',$data);
+				}
+				elseif($q=$this->usermodel->item_name_validation()){
+					$data['duplicate']='Duplicate Name';
+					$this->load->view('masterdata/itm_create',$data);
+				}
+				else{
+					$this->usermodel->item_create();
+					redirect('main/item_list');
+				}
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function item_edit(){
+		if($this->session->userdata('logged_in')){
+			$data['user']=$this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['records']=$this->usermodel->records_get();
+			$this->form_validation->set_rules('iname','Description','required');
+			if($this->form_validation->run() == False){
+				$this->load->view('masterdata/itm_edit',$data);
+			}
+			else{
+				if($q=$this->usermodel->item_edit_name_validation()){
+					$data['duplicate']='Duplicate Name: '.$this->input->post('iname');
+					$this->load->view('masterdata/itm_edit',$data);	
+				}
+				elseif($q=$this->usermodel->item_edit_code_validation()){
+					$data['duplicate']='Duplicate Code: '.$this->input->post('icode');
+					$this->load->view('masterdata/itm_edit',$data);	
+				}
+				else{
+					$this->usermodel->item_edit();
+					redirect('main/item_list');
+				}
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function warehouse_list(){
+		if($this->session->userdata('logged_in')){
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['records'] = $this->usermodel->wh_list();
+			$this->load->view('masterdata/wh_list',$data);
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function warehouse_create(){
+		if($this->session->userdata('logged_in')){
+			$data['user']=$this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$this->form_validation->set_rules('whname','Name','required');
+			$this->form_validation->set_rules('whaddr','Address','required');
+			if ($this->form_validation->run() == false){
+				$this->load->view('masterdata/wh_create',$data);
+			}
+			else{
+				if($q=$this->usermodel->wh_name_validation()){
+				$data['duplicate'] = 'Duplicate Name';
+					$this->load->view('masterdata/wh_create',$data);
+				}
+				else{
+					$this->usermodel->wh_create();
+					redirect('main/warehouse_list');
+				}
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function warehouse_edit(){
+		if($this->session->userdata('logged_in')){
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['records'] = $this->usermodel->records_get();
+			$data['etypelist']=$this->usermodel->etype_active_list();
+			$data['emailrecords']=$this->usermodel->email_list_active();
+			$this->form_validation->set_rules('whname','Name','required');
+			$this->form_validation->set_rules('whaddr','Address','required');
+			if($this->form_validation->run() == false){
+				$this->load->view('masterdata/wh_edit',$data);
+			}
+			else{
+				$this->usermodel->wh_edit();
+				$this->usermodel->wh_add_emailadd();
+				redirect('main/warehouse_list');
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+//main
+	function home(){
+		if($this->session->userdata('logged_in')){
+			$tokens = explode('/', current_url());
+			$get = $tokens[sizeof($tokens)-1];
+			$data['user'] =$this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['warehouses']=$this->usermodel->wh_list_active();
+			$data['uaccess']=$this->usermodel->access_valid();
+			$data['umaccess']=$this->usermodel->access_module_valid();
+			$this->load->view('main/home',$data);
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_item(){
+		if($this->session->userdata('logged_in')){
+			$tokens = explode('/', current_url());
+			$get = $tokens[sizeof($tokens)-1];
+			$data['user'] =$this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['item']=$this->usermodel->wh_item($get);
+			$this->load->view('main/wh_item',$data);
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery(){
+		if($this->session->userdata('logged_in')){
+			$tokens = explode('/', current_url());
+			$get = $tokens[sizeof($tokens)-1];
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$this->form_validation->set_rules('whitem','Item','required');
+			$this->form_validation->set_rules('whqty','Quantity','required|numeric');
+			$data['itemrecord']=$this->usermodel->get_item_record($get);
+			$data['item']=$this->usermodel->item_get();
+			if($tokens[sizeof($tokens)-4] == 'get'){
+				$data['itemvalue']= $tokens[sizeof($tokens)-3];
+				$data['deftype']=1;
+			}
+			else{
+				$data['itemvalue'] = 'select';
+				$data['deftype']='select';
+			}
+			if ($this->form_validation->run() == false){
+				$this->load->view('main/wh_del_add',$data);
+			}
+			else{
+				if ($this->input->post('deltype') == 0){
+					$this->usermodel->home_wh_add();
+					redirect('main');
+				}
+				else{
+					if ($q=$this->usermodel->wh_itemqty_validation()){
+						$data['error']='Invalid Transaction!';
+						$this->load->view('main/wh_del_add',$data);
+					}
+					else{
+						$this->usermodel->home_wh_add();
+						redirect('main');
+					}
+				}
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_reserve(){
+		if($this->session->userdata('logged_in')){
+			$tokens = explode('/', current_url());
+			$get = $tokens[sizeof($tokens)-1];
+			$get1 = $tokens[sizeof($tokens)-2];
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['warehouse']=$this->usermodel->get_warehouse($get);
+			$data['reserverecord']=$this->usermodel->wh_delivery_reserve_list_active($get);
+			$data['item']=$this->usermodel->item_get();
+			if ($tokens[sizeof($tokens)-2] == 'update'){
+				$this->load->view('main/wh_del_reserve_out',$data);
+			}
+			elseif ($tokens[sizeof($tokens)-3] == 'cancel'){
+				
+				$this->usermodel->wh_delivery_reserve_cancel($get);
+				redirect('main');
+			}
+			elseif ($tokens[sizeof($tokens)-3] == 'approve'){
+				//echo '<script>alert("You Have Successfully updated this Record!");</script>';
+				$this->usermodel->wh_delivery_reserve_approve($get);
+				redirect('main/wh_delivery_approve_list');
+			}
+			else{
+				//redirect('main/wh_delivery_out');
+				//$this->usermodel->wh_delivery_reserve_out($get);
+				//redirect('main');
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_cancel(){
+		if($this->session->userdata('logged_in')){
+			$tokens = explode('/', current_url());
+			$get = $tokens[sizeof($tokens)-1];
+			$get1 = $tokens[sizeof($tokens)-2];
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$this->form_validation->set_rules('remarks','Remarks','required');
+			if($this->form_validation->run() == false){
+				$this->load->view('main/wh_del_cancel',$data);
+			}
+			else{
+				$this->usermodel->wh_delivery_reserve_cancel($get);
+				redirect('main');
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_out(){
+		if($this->session->userdata('logged_in')){
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['delinfo']=$this->usermodel->out_del_info();
+			$this->form_validation->set_rules('refname','Reference Name','required');
+			if($this->form_validation->run() == false){
+				$this->load->view('main/wh_del_out',$data);
+			}
+			else{
+				$this->usermodel->wh_delivery_reserve_out();
+				redirect('main');
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function businesspartner(){
+		if($this->session->userdata('logged_in')){
+			$tokens = explode('/', current_url());
+			$get = $tokens[sizeof($tokens)-1];
+			$select = $tokens[sizeof($tokens)-2];
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['bplist'] = $this->usermodel->bp_list_active();
+			$data['itemlist']=$this->usermodel->bpselect_itemlist($get);
+			if ($tokens[sizeof($tokens)-3] == 'warehouse'){
+				$data['whlist']=$this->usermodel->bpselect_whlist($select);
+			}
+			$this->load->view('main/bp_list',$data);
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function businesspartner_select(){
+		if($this->session->userdata('logged_in')){
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['record'] = $this->usermodel->wh_active();
+			$this->load->view('main/bp_warehouse',$data);
+		}
+	}
+	function transactionsearch(){
+		if($this->session->userdata('logged_in')){
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['whlist']=$this->usermodel->whlist();
+			$data['refname']= $this->input->post('bpname');
+			$data['refno']= $this->input->post('ref');
+			$data['wh']= $this->input->post('whlist');
+			$data['sdate']=$this->input->post('sdate');
+			$data['edate']=$this->input->post('edate');
+			if ($this->input->post('sdate') =='' AND $this->input->post('edate')==''){
+				$data['deltran']=$this->usermodel->whlist_sort_nodate();
+			}
+			else{
+				$data['deltran']=$this->usermodel->whlist_sort();
+			}
+			$this->load->view('main/transaction_search',$data);
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_approve_list(){
+		if($this->session->userdata('logged_in')){
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['whlist']=$this->usermodel->whlist();
+			//$data['whouse']= $this->input->post('whouse');
+			$data['refname']= $this->input->post('refname');
+			$data['refno']=$this->input->post('refno');
+			$data['doctype']=$this->usermodel->get_doctype();
+			
+			$this->form_validation->set_rules('whouse','Warehouse','required');
+			if ($this->form_validation->run() == true){
+				$data['reserverecord']=$this->usermodel->wh_delivery_reserve_list();
+			}
+			$data['vwhouse']=$this->input->post('whouse');
+			$this->load->view('main/wh_del_approve',$data);
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_approve_mm_list(){
+		if($this->session->userdata('logged_in')){
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['whlist']=$this->usermodel->whlist();
+			//$data['whouse']= $this->input->post('whouse');
+			$data['refname']= $this->input->post('refname');
+			$data['refno']=$this->input->post('refno');
+			$data['doctype']=$this->usermodel->get_doctype();
+			
+			$this->form_validation->set_rules('whouse','Warehouse','required');
+			if ($this->form_validation->run() == true){
+				$data['reserverecord']=$this->usermodel->wh_delivery_reserve_list_mm();
+			}
+			$data['vwhouse']=$this->input->post('whouse');
+			$this->load->view('main/wh_del_approve_mm',$data);
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_out_list(){
+		if($this->session->userdata('logged_in')){
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['whlist']=$this->usermodel->whlist();
+			$data['whouse']= $this->input->post('whouse');
+			$data['refname']= $this->input->post('refname');
+			$data['refno']=$this->input->post('refno');
+			$data['doctype']=$this->usermodel->get_doctype();
+			$data['reserverecord']=$this->usermodel->wh_delivery_out_list();
+			$this->load->view('main/wh_del_out_list',$data);
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_cancel_list(){
+		if($this->session->userdata('logged_in')){
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['whlist']=$this->usermodel->whlist();
+			$data['whouse']= $this->input->post('whouse');
+			$data['refname']= $this->input->post('refname');
+			$data['refno']=$this->input->post('refno');
+			$data['doctype']=$this->usermodel->get_doctype();
+			$data['reserverecord']=$this->usermodel->wh_delivery_cancel_list_active_search();
+			$this->load->view('main/wh_del_cancel_list',$data);
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_item_reserve(){
+		//SAP88
+		if($this->session->userdata('logged_in')){
+			$this->load->model('b_model');
+			$tokens = explode('/', current_url());
+			$get = $tokens[sizeof($tokens)-1];
+			date_default_timezone_set("Asia/Manila");
+			$date = date('Y-m-d');
+			$date1 = str_replace('-', '/', $date);
+			$tomorrow = date('Y-m-d',strtotime($date1 . "+1 days"));
+			$data['cdate'] = date('Y-m-d');
+			$data['tdate'] = $tomorrow;
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['whlist']=$this->usermodel->whlist();
+			$data['deltype']=$this->usermodel->get_deltype($get);
+			$data['doctype']=$this->usermodel->get_doctype_Out();
+			$data['warehouse']=$this->usermodel->whname_select($get);
+			//From SAP1
+			$data['bpname']=$this->usermodel->get_bplistDdown_SAP($get);
+			$data['item']=$this->usermodel->item_get_SAP();
+			
+			//$data['bpname']=$this->usermodel->get_bplistDdown($get);
+			//$data['item']=$this->usermodel->item_get();
+			
+			$this->form_validation->set_rules('whitem','Item','required');
+			$this->form_validation->set_rules('whqty','Quantity','required|numeric');
+			$this->form_validation->set_rules('wh','Warehouse','required');
+			$this->form_validation->set_rules('bpname','Reference Name','required');
+			$this->form_validation->set_rules('ref','Reference No. 1','required');
+			$this->form_validation->set_rules('uom','Unit of Measurement','required');
+			if ($this->form_validation->run() == false){
+				$this->load->view('main/wh_del_items_reserve',$data);
+			}
+			else{
+				if($q=$this->usermodel->validation_del_in_ref()){
+					$data['error']="Reference Type and Number already encoded.";
+					
+					$this->load->view('header',$data);
+					$this->load->view('main/wh_del_items_in',$data);
+					$this->load->view('footer');
+				}
+				else{
+				//if ($this->input->post('wh') == "-Select-"){
+					//$data['error']='Warehouse field is required.';
+					//$this->load->view('main/wh_del_items_reserve',$data);
+				//}
+				//else{
+					if ($q=$this->usermodel->wh_itemqty_validation()){
+						$data['error']='Insufficient Quantity!';
+						$this->load->view('main/wh_del_items_reserve',$data);
+					}
+					else{
+						if($q=$this->usermodel->validation_del_out_ref()){
+							$data['error']="Reference Type and Number already encoded.";
+							$this->load->view('main/wh_del_items_reserve',$data);
+						}
+						if($this->input->post('doctype1') == 'DO' and $this->input->post('doqty') == null){
+							$data['error']="DO / ITO Quantity is required.";
+							$this->load->view('main/wh_del_items_reserve',$data);
+						}
+						if($this->input->post('doctype2') == 'DO' and $this->input->post('doqty') == null){
+							$data['error']="DO / ITO Quantity is required.";
+							$this->load->view('main/wh_del_items_reserve',$data);
+						}
+						if($this->input->post('ddate') >= $this->input->post('tdate')){
+							$data['error']="Invalid Delivery Date.";
+							$this->load->view('main/wh_del_items_reserve',$data);
+						}
+						else{
+							$this->usermodel->bp_upload();
+							$this->usermodel->home_wh_out();
+							$this->b_model->create_send();
+							redirect('main/home');
+						}
+					}
+				//}
+				}
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_item_out(){
+		if($this->session->userdata('logged_in')){
+			$tokens = explode('/', current_url());
+			date_default_timezone_set("Asia/Manila");
+			$data['cdate'] = date('Y-m-d');
+			$get = $tokens[sizeof($tokens)-1];
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['whlist']=$this->usermodel->whlist();
+			$data['deltype']=$this->usermodel->get_deltype($get);
+			$data['doctype']=$this->usermodel->get_doctype_Out();
+			//From SAP
+			//$data['bpname']=$this->usermodel->get_bplistDdown_SAP($get);
+			//$data['item']=$this->usermodel->item_get_SAP();
+			
+			$data['bpname']=$this->usermodel->get_bplistDdown($get);
+			$data['item']=$this->usermodel->item_get();
+			
+			$data['warehouse']=$this->usermodel->whname_select($get);
+			$this->form_validation->set_rules('whitem','Item','required');
+			$this->form_validation->set_rules('whqty','Quantity','required|numeric');
+			$this->form_validation->set_rules('wh','Warehouse','required');
+			$this->form_validation->set_rules('bpname','Reference Name','required');
+			$this->form_validation->set_rules('ref','Reference No. 1','required');
+			if($tokens[sizeof($tokens)-4] == 'get'){
+				$data['itemvalue']= $tokens[sizeof($tokens)-3];
+				$data['deftype']=1;
+			}
+			else{
+				$data['itemvalue'] = 'select';
+				$data['deftype']='select';
+			}
+			if ($this->form_validation->run() == false){
+				$this->load->view('main/wh_del_items_out',$data);
+			}
+			else{
+				if ($this->input->post('wh') == "-Select-"){
+					$data['error']='Warehouse field is required.';
+					$this->load->view('main/wh_del_items_out',$data);
+				}
+				else{
+					if ($q=$this->usermodel->wh_itemqty_validation()){
+						$data['error']='Insufficient Quantity.';
+						$this->load->view('main/wh_del_items_out',$data);
+					}
+					else{
+						$this->usermodel->home_wh_add();
+						redirect('main/home');
+					}
+				}
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_item_in(){
+		//SAP88
+		$this->load->library('email');
+		if($this->session->userdata('logged_in')){
+			$tokens = explode('/', current_url());
+			$get = $tokens[sizeof($tokens)-1];
+			date_default_timezone_set("Asia/Manila");
+			$this->load->model('b_model');
+			$data['cdate'] = date('Y-m-d');
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['whlist']=$this->usermodel->whlist();
+			$data['deltype']=$this->usermodel->get_deltype();
+			$data['doctype']=$this->usermodel->get_doctype_In();
+			$data['warehouse']=$this->usermodel->whname_select($get);
+			$data['rtn']=$this->usermodel->return_cat();
+			//Modify
+			//From SAP
+			$data['bpname']=$this->usermodel->get_bplistDdown_SAP($get);
+			$data['item']=$this->usermodel->item_get_SAP();
+			
+			//Local
+			//$data['bpname']=$this->usermodel->get_bplistDdown();
+			//$data['item']=$this->usermodel->item_get();
+			// echo $this->uri->segment(3);
+			// if($this->uri->segment(3) == "Search"){
+				// echo "Search";
+			// }
+			//else{
+				
+			//}
+			$this->form_validation->set_rules('whitem','Item','required');
+			$this->form_validation->set_rules('whqty','Quantity','required|numeric');
+			$this->form_validation->set_rules('wh','Warehouse','required');
+			$this->form_validation->set_rules('bpname','Reference Name','required');
+			$this->form_validation->set_rules('ref','Reference No. 1','required');
+			$this->form_validation->set_rules('uom','Unit of Measurement','required');
+			if ($this->form_validation->run() == false){
+				$this->load->view('header',$data);
+				$this->load->view('main/wh_del_items_in',$data);
+				$this->load->view('footer');
+			}
+			else{
+				if($q=$this->usermodel->validation_del_in_ref()){
+					$data['error']="Reference Type and Number already encoded.";
+					
+					$this->load->view('header',$data);
+					$this->load->view('main/wh_del_items_in',$data);
+					$this->load->view('footer');
+				}
+				elseif($this->input->post('doctype1')=='ITO' and $this->input->post('itoqty') == null or $this->input->post('doctype2')=='ITO' and $this->input->post('itoqty') == null){
+					$data['error']="ITO Quantity is Required.";
+					
+					$this->load->view('header',$data);
+					$this->load->view('main/wh_del_items_in',$data);
+					$this->load->view('footer');
+				}
+				else{
+					$this->usermodel->bp_upload();
+					$this->usermodel->SAP_item_add();
+					
+					$this->usermodel->home_wh_add();
+					$this->b_model->create_send();
+					redirect('main/home');
+				}
+				//}
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_item_mm(){ 
+		if($this->session->userdata('logged_in')){
+			$this->load->model('b_model');
+			$tokens = explode('/', current_url());
+			$get = $tokens[sizeof($tokens)-1];
+			date_default_timezone_set("Asia/Manila");
+			$data['cdate'] = date('Y-m-d');
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['whlist']=$this->usermodel->whlist();
+			//$data['doctype']=$this->usermodel->get_doctype_In();
+			$data['warehouse']=$this->usermodel->whname_select($get);
+			$data['process']=$this->usermodel->def_mm_process_active();
+			$data['dtype']=$this->usermodel->def_defaultdeltype_active();
+			$data['snmm']=$this->usermodel->sn_mm();
+			$data['reftype1']=$this->usermodel->ref_mm_primary();
+			$data['reftype2']=$this->usermodel->ref_mm_secondary();
+			$error1 = array();
+			$data['ARI'] = NULL;
+			//Modify
+			//From SAP
+			$data['bpname']=$this->usermodel->customer_mm($get);
+			$data['item']=$this->usermodel->item_get_SAP();
+			
+			//Local
+			//$data['bpname']=$this->usermodel->get_bplistDdown();
+			//$data['item']=$this->usermodel->item_get();
+			$this->form_validation->set_rules('ref','Reference no.1','required');
+			if ($this->form_validation->run() == false){
+				$this->load->view('header',$data);
+				$this->load->view('main/wh_del_items_mm',$data);
+				$this->load->view('footer',$data);
+			}
+			else{
+				if($q=$this->usermodel->validation_del_in_ref()){
+					$data['error']="Reference Type and Number already encoded.";
+					$this->load->view('main/wh_del_items_in',$data);
+				}
+				else{
+					$val = 0;
+					$data1 = array();
+					
+					$i=1;
+					$count1 = 0;
+					while ($i<=10){
+						if ($this->input->post('chk'.$i) == true){
+							$get = $this->input->post('iloc'.$i);
+							$item = $this->input->post('idesc'.$i);
+							$qty = $this->input->post('iqty'.$i);
+							if($q=$this->usermodel->wh_mm_itemqty_validation($get,$item,$qty)){
+								$val += 1;		
+								$error1[$val]='Insufficient Item '.$i.' Quantity!';
+							}
+							foreach ($data1 as  $r){
+								if ($r == $item){
+									$data['idescerror']='Delivery Out:Same Item is not allowed!';
+									$val +=1;
+								}
+							}
+							$data1[$count1] = $item;
+						}
+						$count1++;
+						$i++;
+					}
+					//Delivery In
+					$o=1;
+					$data2 = array();
+					$count2=0;
+					while ($o<=10){
+						if ($this->input->post('ochk'.$o) == true){
+							$get = $this->input->post('oiloc'.$o);
+							$item = $this->input->post('oidesc'.$o);
+							$qty = $this->input->post('oiqty'.$o);
+							foreach ($data2 as  $r){
+								if ($r == $item){
+									$data['idescerror2']='Delivery In:Same Item is not allowed!';
+									$val +=1;
+								}
+							}
+							$data2[$count2] = $item;
+						}
+						$count2++;
+						$o++;
+					}
+					if ($val == 0){
+						$ii=1;
+						while($ii<=10){
+							if ($this->input->post('chk'.$ii) == true){
+								$whname= $this->input->post('iloc'.$ii);
+								$idesc=$this->input->post('idesc'.$ii);
+								$iuom=$this->input->post('iunit'.$ii);
+								$iqty=$this->input->post('iqty'.$ii);	
+								$this->usermodel->del_mm_item3($whname,$idesc,$iuom,$iqty);
+							}
+							if ($this->input->post('ochk'.$ii) == true){
+								$owhname= $this->input->post('oiloc'.$ii);
+								$oidesc=$this->input->post('oidesc'.$ii);
+								$oiuom=$this->input->post('oiunit'.$ii);
+								$oiqty=$this->input->post('oiqty'.$ii);	
+								$this->usermodel->del_mm_item_in($owhname,$oidesc,$oiuom,$oiqty);
+							}
+							$ii++;
+						}
+						//Modify
+						$this->usermodel->bp_upload();
+						$this->usermodel->SAP_item_add();
+						
+						$this->usermodel->add_transnum();
+						
+						$this->b_model->create_send();
+						redirect('main');
+					}
+					else{
+						$data['outval'] = $error1;
+						$this->load->view('header',$data,$error1);
+						$this->load->view('main/wh_del_items_mm',$error1,$data);
+						$this->load->view('footer',$data,$error1);
+					}
+				}
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function user_access_list(){
+		if($this->session->userdata('logged_in')){
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['records']=$this->usermodel->userlist();
+			$this->load->view('masterdata/usr_list',$data);
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function user_access_update_wh(){
+		if($this->session->userdata('logged_in')){
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['whlist']=$this->usermodel->all_whlist();
+			//$data['aclist']=$this->usermodel->useraccesslist();
+			$data['uwhlist']=$this->usermodel->user_whauselist();
+			//$data['ualist']=$this->usermodel->user_accesslist();
+			$this->load->view('masterdata/usr_add_access_wh',$data);
+			$this->form_validation->set_rules('uname','Name','required');
+			if ($this->form_validation->run() == true){
+				if ($this->input->post('whouse')<>'-Select-'){
+					if ($q=$this->usermodel->access_add_module1()){
+						$this->usermodel->access_update_wh();
+					}
+					else{
+						$this->usermodel->access_add_wh();
+					}
+					redirect('main/user_access_list');
+				}
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function user_access_update_mod(){
+		if($this->session->userdata('logged_in')){
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['aclist']=$this->usermodel->useraccesslist();
+			$data['ualist']=$this->usermodel->user_accesslist();
+			$this->load->view('masterdata/usr_add_access_module',$data);
+			$this->form_validation->set_rules('uname','Name','required');
+			if ($this->form_validation->run() == true){
+				if ($this->input->post('access')<>'-Select-'){
+					if($q=$this->usermodel->access_add_module2()){
+						$this->usermodel->access_update_mod();
+					}
+					else{
+						$this->usermodel->access_add_mod();
+					}
+					redirect('main/user_access_list');
+				}
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_unserve_list(){
+		if($this->session->userdata('logged_in')){
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['whlist']=$this->usermodel->whlist();
+			$data['whouse']= $this->input->post('whouse');
+			$data['refname']= $this->input->post('refname');
+			$data['sdate']=$this->input->post('sdate');
+			$data['edate']=$this->input->post('edate');
+			//if ($this->input->post('sdate')  == '' AND $this->input->post('edate') == ''){
+			$data['reserverecord']=$this->usermodel->wh_delivery_unserve_list_active_search();
+			$this->load->view('main/wh_del_unserve_list',$data);
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_rr_summary(){
+		if($this->session->userdata('logged_in')){
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['whlist']=$this->usermodel->whlist();
+			$data['whouse']= $this->input->post('whouse');
+			$data['refname']= $this->input->post('refname');
+			$data['sdate']=$this->input->post('sdate');
+			$data['edate']=$this->input->post('edate');
+			if ($this->input->post('sdate')  == '' AND $this->input->post('edate') == ''){
+				$data['reserverecord']=$this->usermodel->wh_delivery_rr_summary_search();
+			}
+			else{
+				$data['reserverecord']=$this->usermodel->wh_delivery_rr_summary_date_search();
+			}
+			$this->load->view('main/wh_del_rr_list',$data);
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_dr_summary(){
+		if($this->session->userdata('logged_in')){
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['whlist']=$this->usermodel->whlist();
+			$data['whouse']= $this->input->post('whouse');
+			$data['refname']= $this->input->post('refname');
+			$data['sdate']=$this->input->post('sdate');
+			$data['edate']=$this->input->post('edate');
+			if ($this->input->post('sdate')  == '' AND $this->input->post('edate') == ''){
+				$data['reserverecord']=$this->usermodel->wh_delivery_dr_summary_search();
+			}
+			else{
+				$data['reserverecord']=$this->usermodel->wh_delivery_dr_summary_date_search();
+			}
+			$this->load->view('main/wh_del_dr_list',$data);
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_wis_summary(){
+		if($this->session->userdata('logged_in')){
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['whlist']=$this->usermodel->whlist();
+			$data['whouse']= $this->input->post('whouse');
+			$data['refname']= $this->input->post('refname');
+			$data['sdate']=$this->input->post('sdate');
+			$data['edate']=$this->input->post('edate');
+			if ($this->input->post('sdate')  == '' AND $this->input->post('edate') == ''){
+				$data['reserverecord']=$this->usermodel->wh_delivery_wis_summary_search();
+			}
+			else{
+				$data['reserverecord']=$this->usermodel->wh_delivery_wis_summary_date_search();
+			}
+			$this->load->view('main/wh_del_wis_list',$data);
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_war_summary(){
+		if($this->session->userdata('logged_in')){	
+			$this->load->model('report_model');
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['whlist']=$this->usermodel->whlist();
+			$data['sdate']=$this->input->post('sdate');
+			$data['edate']=$this->input->post('edate');
+			$data['reserverecord']=$this->report_model->war();
+			$this->load->view('main/wh_del_war_list',$data);
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function item_in_readonly(){
+		if($this->session->userdata('logged_in')){
+			
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+
+			$data['records']=$this->usermodel->get_item_active();
+			
+			$this->form_validation->set_rules('desti','Destination','required');
+			if($this->form_validation->run() == true){
+				redirect('main/home');
+			}
+			else{
+				$this->load->view('header',$data);
+				$this->load->view('main/wh_del_items_in_readonly',$data);
+				$this->load->view('footer',$data);
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_trckng_list(){
+		if($this->session->userdata('logged_in')){
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['user'] = $this->usermodel->signin_user();
+			$data['whlist']=$this->usermodel->whlist();
+			//$data['whouse']= $this->input->post('whouse');
+			$data['refname']= $this->input->post('refname');
+			$data['refno']=$this->input->post('refno');
+			$data['doctype']=$this->usermodel->get_doctype();
+			
+			$this->form_validation->set_rules('whouse','Warehouse','required');
+			if ($this->form_validation->run() == true){
+				$data['reserverecord']=$this->usermodel->wh_delivery_trckng_list();
+			}
+			$data['vwhouse']=$this->input->post('whouse');
+			$this->load->view('main/wh_del_trckng',$data);
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_trckng_monitor(){
+		if($this->session->userdata('logged_in')){
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+
+			$data['records']=$this->usermodel->get_item_active();
+			
+			//$this->form_validation->set_rules('source','Source','required');
+			$this->form_validation->set_rules('sdate','Delivery Date','required');
+			if($this->form_validation->run() == false){
+				$this->load->view('header',$data);
+				$this->load->view('main/wh_del_trckng_monitor',$data);
+				$this->load->view('footer',$data);
+			}
+			else{
+				if ($this->input->post('deliv') == true){
+					$this->usermodel->trckng_update();
+					redirect('main/home');
+				}
+				else{
+					redirect('main/wh_delivery_trckng_list');
+				}
+				
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function wh_delivery_item_in_getsap(){
+		//SAP88
+		$this->load->library('email');
+		if($this->session->userdata('logged_in')){
+			$tokens = explode('/', current_url());
+			$get = $tokens[sizeof($tokens)-1];
+			date_default_timezone_set("Asia/Manila");
+			$data['cdate'] = date('Y-m-d');
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['whlist']=$this->usermodel->whlist();
+			$data['deltype']=$this->usermodel->get_deltype();
+			$data['doctype']=$this->usermodel->get_doctype_In();
+			$data['warehouse']=$this->usermodel->whname_select($get);
+			
+			$data['ponum']=$this->input->post('doctype1');
+			//echo $this->input->post('doctype1');
+			//Modify
+			//From SAP
+			//$data['bpname']=$this->usermodel->get_bplistDdown_SAP($get);
+			//$data['item']=$this->usermodel->item_get_SAP();
+			
+			//Local
+			$data['bpname']=$this->usermodel->get_bplistDdown();
+			$data['item']=$this->usermodel->item_get();
+
+			$this->form_validation->set_rules('whitem','Item','required');
+			$this->form_validation->set_rules('whqty','Quantity','required|numeric');
+			$this->form_validation->set_rules('wh','Warehouse','required');
+			$this->form_validation->set_rules('bpname','Reference Name','required');
+			$this->form_validation->set_rules('ref','Reference No. 1','required');
+			$this->form_validation->set_rules('uom','Unit of Measurement','required');
+			if ($this->form_validation->run() == false){
+				$this->load->view('header',$data);
+				$this->load->view('main/wh_del_items_in_getsap',$data);
+				$this->load->view('footer');
+			}
+			else{
+				if($q=$this->usermodel->validation_del_in_ref()){
+					$data['error']="Reference Type and Number already encoded.";
+					$this->load->view('main/wh_del_items_in',$data);
+				}
+				else{
+					//$this->usermodel->bp_upload();
+					//$this->usermodel->SAP_item_add();
+					$this->usermodel->home_wh_add();
+
+					redirect('main/home');
+				}
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function mm_list(){
+		if($this->session->userdata('logged_in')){
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['user'] = $this->usermodel->signin_user();
+			$data['whlist']=$this->usermodel->whlist();
+			
+			$data['refname']= $this->input->post('refname');
+			$data['refno']=$this->input->post('refno');
+			$data['doctype']=$this->usermodel->get_doctype();
+			$this->form_validation->set_rules('whouse','Warehouse','required');
+			if ($this->form_validation->run() == true){
+				$data['reserverecord']=$this->usermodel->wh_delivery_mm_list();
+			}
+			$data['vwhouse']=$this->input->post('whouse');
+			$this->load->view('main/wh_del_update_mm',$data);
+		}
+		else{
+			redirect('main');
+		}
+	}
+	
+	function mm_update(){
+		if($this->session->userdata('logged_in')){
+			date_default_timezone_set("Asia/Manila");
+			$data['cdate'] = date('Y-m-d');
+			$data['user'] = $this->usermodel->signin_user();
+			$data['modaccess']=$this->usermodel->access_module_approve();
+			$data['whlist']=$this->usermodel->whlist();
+			$data['process']=$this->usermodel->def_mm_process_active();
+			$data['dtype']=$this->usermodel->def_defaultdeltype_active();
+			$data['snmm']=$this->uri->segment(3);
+			$error1 = array();
+			$data['records'] = $this->usermodel->mm_update_get();
+			$data['itemout']=$this->usermodel->mm_update_iteoout_get();
+			$data['itemin']=$this->usermodel->mm_update_itemin_get();
+			
+			$data['item']=$this->usermodel->item_get();
+			$this->form_validation->set_rules('ref','Reference no.1','required');
+			if ($this->form_validation->run() == false){
+				$this->load->view('header',$data);
+				$this->load->view('main/wh_del_items_mm_update',$data);
+				$this->load->view('footer',$data);
+			}
+			else{
+				if($q=$this->usermodel->validation_del_in_ref()){
+					$data['error']="Reference Type and Number already encoded.";
+					$this->load->view('header',$data);
+					$this->load->view('main/wh_del_items_mm_update',$data);
+					$this->load->view('footer',$data);
+				}
+				else{
+					$val = 0;
+					$data1 = array();
+					
+					$i=1;
+					$count1 = 0;
+					while ($i<=10){
+						if ($this->input->post('chk'.$i) == true){
+							$get = $this->input->post('iloc'.$i);
+							$item = $this->input->post('idesc'.$i);
+							$qty = $this->input->post('iqty'.$i);
+							if($q=$this->usermodel->wh_mm_itemqty_validation($get,$item,$qty)){
+								$val += 1;		
+								$error1[$val]='Insufficient Item '.$i.' Quantity!';
+							}
+							foreach ($data1 as  $r){
+								if ($r == $item){
+									$data['idescerror']='Delivery Out:Same Item is not allowed!';
+									$val +=1;
+								}
+							}
+							$data1[$count1] = $item;
+						}
+						$count1++;
+						$i++;
+					}
+					//Delivery In
+					$o=1;
+					$data2 = array();
+					$count2=0;
+					while ($o<=10){
+						if ($this->input->post('ochk'.$o) == true){
+							$get = $this->input->post('oiloc'.$o);
+							$item = $this->input->post('oidesc'.$o);
+							$qty = $this->input->post('oiqty'.$o);
+							foreach ($data2 as  $r){
+								if ($r == $item){
+									$data['idescerror2']='Delivery In:Same Item is not allowed!';
+									$val +=1;
+								}
+							}
+							$data2[$count2] = $item;
+						}
+						$count2++;
+						$o++;
+					}
+					if ($val == 0){
+						$ii=1;
+						while($ii<=10){
+							if ($this->input->post('chk'.$ii) == true){
+								$whname= $this->input->post('iloc'.$ii);
+								$idesc=$this->input->post('idesc'.$ii);
+								$iuom=$this->input->post('iunit'.$ii);
+								$iqty=$this->input->post('iqty'.$ii);	
+								$this->usermodel->del_mm_item3($whname,$idesc,$iuom,$iqty);
+							}
+							if ($this->input->post('ochk'.$ii) == true){
+								$owhname= $this->input->post('oiloc'.$ii);
+								$oidesc=$this->input->post('oidesc'.$ii);
+								$oiuom=$this->input->post('oiunit'.$ii);
+								$oiqty=$this->input->post('oiqty'.$ii);	
+								$this->usermodel->del_mm_item_in($owhname,$oidesc,$oiuom,$oiqty);
+							}
+							$ii++;
+						}
+						redirect('main');
+					}
+					else{
+						$data['outval'] = $error1;
+						$this->load->view('header',$data);
+						$this->load->view('main/wh_del_items_mm_update',$data);
+						$this->load->view('footer',$data);
+					}
+				}
+			}
+		}
+		else{
+			redirect('main');
+		}
+	}
+	function mm_done(){
+		if($this->session->userdata('logged_in')){
+			$this->usermodel->mm_done();
+			redirect('main/mm_list');
+		}
+		else{
+			redirect('main');
+		}
+	}	
+}
+?>

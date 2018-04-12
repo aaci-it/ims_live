@@ -1,0 +1,248 @@
+body
+{
+	width: auto;
+	margin: auto;
+}
+a
+{
+	text-decoration: none;
+	color: orange;
+}
+a:hover
+{
+	color:red;
+}
+/* Account */
+
+.login
+{
+	width: 480px;
+	height: 150px;
+	margin: auto;
+	margin-top: 150px;
+}
+.loginError2
+{
+	height: auto; 
+	font-family: calibri, helvetica;
+	font-size: 14px;
+	color: white;
+}
+.loginError
+{
+	height: auto;
+	border: 1px solid #e84e4f;
+    background: #9c2b2e;
+    border-radius: 1em ;
+	font-family: calibri, helvetica;
+	font-size: 12px;
+	color: white;
+	text-align: center;
+	margin: auto;
+}
+.fieldError
+{
+	color: white;
+	background-color: #9c2b2e;
+}
+.loginBox
+{
+	width: 475px;
+	margin: auto;
+	height: 145px;
+	background-color: Grey;
+	background: url('images/loginBG2.png');
+	font-family: Calibri, Helvetica;
+	font-size: 14px;
+	color: white;
+}
+.loginBox table
+{
+	margin-top: 10px;
+	margin-right: 25px;
+}
+/* NavBar */
+.navbar
+{
+	background-color: black;
+	color: orange;
+	font-family: Calibri, Helvetica;
+	text-indent: 10px;
+	font-size: 14px;
+	margin-bottom: 20px;
+}
+.navbar a
+{
+	color: red;
+	text-decoration: none;
+}
+.navbar a:hover
+{
+	color: white;
+}
+.menu-container 
+{
+	width: auto;
+	height: 40px;
+	clear: both;
+}
+.menu-container li
+{
+	float: left;
+	list-style: none;
+	display: inline;
+	
+}
+.menu-container li:hover > a
+{
+	
+}
+ul.menu ul
+{
+	display:none;
+	padding:0px;
+}
+ul.menu li:hover > ul
+{
+	display: block;
+	position: absolute;
+	
+}
+/* Content */
+.content-tmpl
+{
+	margin-top:-20px;
+	font-family: calibri, helvetica;
+}
+.page-content
+{
+	margin-top: 20px;
+	margin: auto;
+	font-size: 12px;
+	font-family: Calibri, helvetica;
+	padding: 20px;
+	width: 960px;
+}
+.system-description
+{
+	font-size: 14px;
+	border: 1px solid #00CCFF;
+    background: black;
+    border-radius: .5em ;
+	text-align: justify;
+	text-justify: inter-word;
+	margin: 25px;
+	color: white;
+	
+}
+.accountMenu
+{
+	color: white;
+	float: left;
+	display:block;
+	height: 500px;
+	width: 170px;
+	background-color: black;
+}
+.main-menu
+{
+	font-size: 12px;
+	height: auto;
+	font-family: Calibri, helvetica;
+}
+.main-menu li
+{	
+	padding: 5px;
+	display: block;
+	text-indent: 10px;
+}
+
+.main-menu a
+{
+	text-decoration: none;
+	color: white;
+}
+.main-menu a:hover
+{
+	color: orange;
+}
+.ui-widget-content
+{
+	font-family: Calibri, Helvetica;
+	font-size: 12px;
+	font-weight: normal;
+}
+.ui-widget-content a:hover
+{
+	color: red;
+}
+.kitchen-tools
+{
+	text-align: right;
+	color: Grey;
+}
+.kitchen-tools input[type="text"], input[type="submit"]
+{
+	font-size: 12px;
+}
+.kitchen-tools input[type="text"]:focus
+{
+	background-color: #00CCFF;
+	color: white;
+}
+input[type="text"]:focus
+{
+	background-color: #303030 ;
+	color: white;
+}
+input[type="password"]:focus
+{
+	background-color: #303030 ;
+	color: white;
+}
+input[type="text"]:-moz-read-only { /* For Firefox */
+    background-color: #888888 ;
+	color: white;
+}
+} 
+input[type="text"]:read-only
+{
+	background-color: #888888 ;
+	color: white;
+}
+/* Shipping */
+.dialog-message
+{
+	font-size: 12px;
+}
+/* Print Layout */
+.loi-print
+{
+	width: 960px;
+	margin: auto;
+	font-family: Calibri, Helvetica;
+}
+.loi-print h3
+{
+	font-size: 12px;
+	font-weight: normal;
+}
+.prnt-content
+{
+	font-family: Calibri, Helvetica;
+	font-size: 14px;
+}
+
+/* Controls */
+
+/* End Content */
+/* Footer */
+.footer
+{
+	width: 480px;
+	margin: auto;
+	color: Grey;
+	font-family: Calibri, Helvetica;
+	font-size: 12px;
+	text-align: center;
+}

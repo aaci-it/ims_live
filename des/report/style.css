@@ -1,0 +1,10 @@
+#wrapper {
+	width: 1080px;
+	margin: auto;
+}
+
+#heads1 {
+	width: 216px;
+	float: left;
+	overflow: hidden;
+}

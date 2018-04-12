@@ -1,0 +1,90 @@
+#dr {
+	width: 900px;
+	font-size: 20px;
+	margin: 170px 0 0 0;
+}
+
+#l1{
+	width: 900px;
+}
+
+#l2{
+	width: 900px;
+	height: 70px;
+	clear: both;
+}
+
+#top{
+	float: right;
+	width: 300px;
+	text-align: center;
+}
+
+#uno, #dos {
+	width: 450px;
+	float: left;
+	text-indent: 30px;
+}
+
+#l3{
+	width: 900px;
+	height: 70px;
+	clear: both;
+	margin-top: 40px;
+}
+
+#tres {
+	width: 100px;
+	float: left;
+}
+
+#quatro{
+	width: 260px;
+	float: left;
+}
+
+#cinco, #sais, #siete {
+	width: 180px;
+	float: left;
+	text-align: left;
+}
+
+#siete{
+	text-align: center;
+}
+
+#l4, #l5{
+	width: 900px;
+	height: 70px;
+	clear:both;
+	margin-top: 50px;
+}
+
+#ocho {
+	width: 250px;
+	float: left;
+	text-align: center;
+}
+
+#nueve {
+	width: 150px;
+	float: left;
+	text-indent: 20px;
+}
+
+#dyes {
+	width: 500px;
+	float: left;
+	text-align: center;
+}
+
+#onse{
+	width: 400px;
+	float: left;
+} 
+
+#dose{
+	width: 500px;
+	float: left;
+	text-align: center;
+}

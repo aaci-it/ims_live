@@ -1,0 +1,44 @@
+body{
+	background-color:#ebebeb;
+}
+.navbar-inverse{
+	background-color:#ebebeb;
+	height:10%;
+	border:0;	
+	padding:5px;
+}
+
+.container-fluid{
+	width:80%;
+	margin-top:-6%;
+}
+
+.container-fluidtwo{
+	width:30%;
+	margin-top:8%;
+}
+
+.panel-body{
+	background-color:#3a6f8f;
+	background-color:#FFFFFF;
+	box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+	border-radius:2px;
+}
+.form-control{
+	border-radius:0px;
+}
+
+.navbar-brand{
+	margin-left:-5%;
+	margin-top:-5%;
+}
+
+thead{
+	background-color:#3a6f8f;
+	color:white;
+}
+table{
+	box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+	background-color:white;
+	margin-top:5%;
+}

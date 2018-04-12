@@ -1,0 +1,105 @@
+body {
+	width: 1080px;
+	margin: auto;
+	background: #f8b878;
+}
+
+#login_form, #reg {
+	width: 305px;
+	margin: 100px auto auto auto;
+	padding: 1em;
+	background: #f0f0f0;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border: 1px solid white;
+}
+
+#login_form input[type=text], #login_form input[type=password], #reg input[type=text] {
+	display: block;
+	margin: 0 0 1em 0;
+	width: 280px;
+	border: 5px;
+	-moz-border-radius: 1px;
+	-webkit-border-radius: 1px;
+	padding: 1em;
+}
+
+#login_form input[type=submit], #login_form form a {
+	border: none;
+	width: 305px;
+	margin-right: 1em;
+	padding: 6px;
+	text-decoration: none;
+	font-size: 12px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	background: #cc7b2a;
+	color: white;
+}
+
+#login_form input[type=submit]:hover {
+	background: #9a5d20;
+	cursor: pointer;
+}
+
+#del {
+	width: 1080px;
+}
+
+#del table{
+	border: 1px solid black;
+}
+
+#del table tr td{
+	border: 1px solid black;
+	width: 80px;
+	height: 30px;
+	font-size: 12px;
+	text-align: center;
+}
+
+#buttons input[type=submit], #buttons a {
+	border: none;
+	width: 200px;
+	margin-right: 1em;
+	padding: 6px;
+	text-decoration: none;
+	font-size: 12px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	background: #cc7b2a;
+	color: white;
+}
+
+#buttons input[type=submit]:hover, #buttons a:hover {
+	background: #9a5d20;
+	cursor: pointer;
+}
+
+.hide {
+	display: none;
+}
+
+#authorization {
+	width: 960px;
+}
+
+#authorization table {
+	border: 1px solid black;
+}
+
+#authorization table tr td{
+	border: 1px solid black;
+	width: 182px;
+	font-size: 12px;
+	text-align: center;
+}
+
+#header {
+	width: 1080px;
+}
+
+#TopPanel {
+	width: 300px;
+	float: right;
+}

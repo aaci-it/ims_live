@@ -1,0 +1,99 @@
+<?php
+	if($this->uri->segment(2) == 'user_access_list' OR $this->uri->segment(2) == 'warehouse_list' OR $this->uri->segment(2) == 'item_list' ){
+		if($this->session->userdata('user_lvl') != 'Admin'){ redirect('main/index'); }
+	}
+?>
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<link href="<?php echo base_url();?>des/index.css" type = "text/css" rel="stylesheet" />
+	<link href="<?php echo base_url();?>des/sortable/themes/blue/style.css" type = "text/css" rel="stylesheet" />
+	<link href="<?php echo base_url();?>des/sortable/addons/pager/jquery.tablesorter.pager.css" type = "text/css" rel="stylesheet" />
+	<script type="text/javascript" src="<?php echo base_url();?>des/sortable/jquery-latest.js"></script>
+	<script type="text/javascript" src="<?php echo base_url();?>des/sortable/jquery.tablesorter.js"></script> 
+	<script type="text/javascript" src="<?php echo base_url();?>des/sortable/addons/pager/jquery.tablesorter.pager.js"></script>
+	<script type="text/javascript" src="<?php echo base_url();?>des/sortable/jquery.table.pager.js"></script>
+	<script type="text/javascript">
+	$(document).ready(function() 
+	    { 
+	        $("#myTable").tablesorter(); 
+	    } 
+	); 
+	$(document).ready(function() 
+	    { 
+	        $("#myTable").tablesorter( {sortList: [[0,0]]} ); 
+	    } 
+	);
+	$(document).ready(function() 
+		{ 
+			$("#myTable") 
+			.tablesorter({widthFixed: true, widgets: ['zebra']}) 
+			.tablesorterPager({container: $("#pager")});		
+		}
+	); 
+	</script>
+
+</head>
+<body>
+<?php foreach ($user as $r):?>
+
+<div id="header">
+	<div>
+		<h1>Inventory Monitoring</h1>
+		<?php echo $r->memb__username;?><span><?php if($this->session->userdata('user_lvl') == 'Admin'){ echo anchor('main/register','Register'); }?></span><span><?php echo anchor('main/change_password', 'Change Password'); ?></span><span><?php echo anchor('main/logout','Sign out');?></span>
+		<?php if($this->session->userdata('user_lvl') == 'Admin'):?>
+		<span>
+			<?php echo anchor('main/user_access_list','Administration');?>
+		</span>
+	
+		<?php endif;?>
+	</div>
+	<ul class="selected">
+		<li>
+			<?php echo anchor ('main','HOME');?>
+		</li>
+		<?php if(isset($modaccess)):foreach ($modaccess as $a):?>
+		<?php if ($a->accessname == "Approve"):?>
+		<li>
+			<?php echo anchor('main/wh_delivery_approve_list','Approve');?>
+		</li>
+		<?php endif;?>
+		<?php if ($a->accessname == "Out"):?>
+		<li>
+			<?php echo anchor('main/wh_delivery_out_list','Out');?>
+		</li>
+		<?php endif;?>
+		<?php if ($a->accessname == "Monitor"):?>
+		<li>
+			<?php echo anchor('main/wh_delivery_trckng_list','Monitor');?>
+		</li>
+		<?php endif;?>
+		<?php if ($a->accessname == "Cancel"):?>
+		<li>
+			<?php echo anchor('main/wh_delivery_cancel_list','Cancel');?>
+		</li>
+		<?php endif?>
+		<li>
+			<?php //echo anchor('main/businesspartner','BP ITEM');?>
+		</li>
+		
+		<?php endforeach;?>
+		<?php endif;?>
+		<?php if($a->accessname=="MM List"):?>
+		<li>
+			<?php echo anchor ('main/mm_list','MM List');?>
+		</li>
+		<?php endif?>
+		<li>
+			<?php echo anchor ('main/wh_delivery_unserve_list','REPORTS');?>
+		</li>
+		<li>
+			<?php echo anchor ('main/transactionsearch','T. LOGS');?>
+		</li>
+	</ul>
+</div>
+<?php endforeach;?>
+    
+       

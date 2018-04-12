@@ -1,0 +1,327 @@
+<?php
+class Acl_model extends CI_Model {
+	
+	function __construct() {
+		parent::__construct();
+	}
+	
+	function cleanInput($input) {
+	  $search = array(
+		'@<script[^>]*?>.*?</script>@si',   // Strip out javascript
+		'@<[\/\!]*?[^<>]*?>@si',            // Strip out HTML tags
+		'@<style[^>]*?>.*?</style>@siU',    // Strip style tags properly
+		'@<![\s\S]*?--[ \t\n\r]*>@'         // Strip multi-line comments
+	  );
+	 
+		$output = preg_replace($search, '', $input);
+		return $output;
+	}
+	
+	function sanitize($input) {
+		if (is_array($input)) {
+			foreach($input as $var=>$val) {
+				$output[$var] = sanitize($val);
+			}
+		}
+		else {
+			if (get_magic_quotes_gpc()) {
+				$input = stripslashes($input);
+			}
+			$input  = $this->cleanInput($input);
+			$output = mysql_real_escape_string($input);
+			$output = trim($output);
+		}
+		return $output;
+	}
+	
+	
+	function if_digit($a){
+		// Old code ereg("^([0-9]+|[0-9]{1,3}(,[0-9]{3})*)(.[0-9]{1,2})?$", $a)
+		if(preg_match("/^([0-9]+|[0-9]{1,3}(,[0-9]{3})*)(.[0-9]{1,2})?$/", $a)){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
+	function email_config(){
+		$config = array(
+			'protocol' => 'smtp',
+			'smtp_host' => '192.168.0.66',
+			'smtp_port' => 25,
+			'smtp_user' => 'web@mkt.aaci.ph',
+			'smtp_pass' => 'pogisieric',
+			'charset' => 'utf-8',
+			'mailtype' => 'html',
+			'newline' => "\r\n"
+		);
+		$this->load->library('email');
+		$this->email->initialize($config);
+	}
+	
+	function change_password(){
+		$old = $this->sanitize($this->input->post('cpword'));
+		$new = $this->sanitize($this->input->post('npword'));
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('cpword', 'Current Password', 'trim|required');
+		$this->form_validation->set_rules('npword', 'New Password', 'trim|required|matches[npword2]');
+		$this->form_validation->set_rules('npword2', 'Re-Type New Password', 'trim|required');
+		if($this->form_validation->run()){
+			$d = array('memb__pword' => md5($new));
+			$this->db->where('memb__id',$this->session->userdata('usr_uname')); 
+			$update = $this->db->update('ousr',$d);
+			if($update){
+				return 'Password has been replaced!';
+			}
+		}
+	}
+	
+	function forgot_password(){
+		$email = $this->sanitize($this->input->post('email'));
+		
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
+		if($this->form_validation->run()){
+			if($username = $this->email_check($email)){ 	
+				$pw = $this->sanitize((rand(100000,900000)));
+				$d = array('memb__pword' => md5($pw));
+				$this->db->where('memb__email',$email); 
+				$update = $this->db->update('ousr',$d);
+				if($update > 0){
+					
+					$this->email_config();
+					$this->email->from('web@mkt.aaci.ph', 'AACI WEB Inventory System');
+					$this->email->to($email);
+					$this->email->subject('AACI Web Inventory system password reset');
+					$email_content = "<p>AACI Web Inventory system password reset</p>
+						Username: ".$username." <br />
+						Password: ".$pw." <br />
+						Kindly change your password after you login to the system. <a href='".base_url()."'>Click here</a>
+					";
+					$this->email->message($email_content);
+					
+					if(!$this->email->send()){
+						return show_error($this->email->print_debugger());
+					}
+					return 'Your password has been sent to your email.';
+				}
+			}
+			else{
+				return 'Email does not exist!';
+			}
+		}
+	}
+	
+	function register(){
+		//get the VRs clean 
+		$username = $this->sanitize($this->input->post('username'));
+		$name = $this->sanitize($this->input->post('name'));
+		$email = $this->sanitize($this->input->post('email'));
+		
+		//check for duplicate or if some parts already exist and other sh*t.
+		if($this->email_check($email)){ return 'email already exist!'; }
+		if($this->username_check($username)){ return 'username already exist'; }
+		if($this->name_check($name)){ return 'name already exist!'; }
+		
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('username', 'Username', 'trim|required');
+		$this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
+		$this->form_validation->set_rules('name', 'Name', 'trim|required');
+		
+		if($this->form_validation->run()){
+			$pw = $this->sanitize((rand(100000,900000)));
+			$d = array(
+				'memb__id' => $username,
+				'memb__username' => $name,
+				'memb__pword' => md5($pw),
+				'memb__email' => $email,
+				'memb__status' => 1
+			);
+			$insert = $this->db->insert('ousr',$d);
+			if($insert > 0){
+				
+				$this->email_config();
+				$this->email->from('web@mkt.aaci.ph', 'AACI WEB Inventory System');
+				$this->email->to($email);
+				$this->email->subject('AACI Web Inventory system registration');
+				$email_content = "<p>AACI Web Inventory system registration</p>
+					Username: ".$username." <br />
+					Password: ".$pw." <br />
+					Kindly change your password after you login to the system. <a href='".base_url()."'>Click here</a>
+				";
+				$this->email->message($email_content);
+				
+				if(!$this->email->send()){
+					return show_error($this->email->print_debugger());
+				}
+				return 'Registration has been successfull!';
+			}
+		}
+		else{
+			return 'Registration failed!';
+		}
+	}
+	
+	
+	/* function login(){
+		$this->load->database();
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('username','Username','required|trim ');
+		$this->form_validation->set_rules('password','Password','required|trim ');
+		
+		if($this->form_validation->run()){
+			$username = $this->sanitize($this->input->post('username'));
+			$password = $this->sanitize($this->input->post('password'));
+			$this->db->where('memb__id',$username);
+			$this->db->where('memb__pword',md5($password));
+			$q = $this->db->get('ousr');
+			if($q->num_rows == 1){
+				$row = $q->row();
+				$logindata= array(
+					'userid' => $row->memb__id,
+					'username' => $row->memb__username,
+					'validated'=>true
+				);
+				$this->session->set_userdata($logindata);
+				return true;
+			}
+			else{
+				return 'Wrong Username or Password';
+			}
+		}
+		return false;
+    } */
+	
+	function email_check($email){
+		$this->db->where('memb__email',$email); 
+		$q = $this->db->get('ousr');
+		if($q->num_rows == 1){ $data = $q->row(); $un = $data->memb__id; return $un; }{ return false; }
+	}
+	
+	function username_check($username){
+		$this->db->where('memb__id',$username); 
+		$q = $this->db->get('ousr');
+		if($q->num_rows == 1){ return true; }{ return false; }
+	}
+	
+	function name_check($name){
+		$this->db->like('memb__username',$name); 
+		$q = $this->db->get('ousr');
+		if($q->num_rows == 1){ return true; }{ return false; }
+	}
+	
+	function my_update(){
+		$d = array(
+			'memb__pword' => md5($this->input->post('pword')),
+			'memb__email' => $this->input->post('email'),
+			'memb__lastuser' => $this->session->userdata('username')
+		);
+		$this->db->where('memb__id',$this->input->post('usrcode'));
+	}
+	
+	function dr_layout(){
+		//$DocNum = $this->uri->segment(3);
+		$DocNum = $this->input->post('do');
+		/*if($this->input->post('add_dr_no')){
+			$adt = $this->load->database('adt', TRUE);
+			if($this->check_dr_number()){
+				$update = array(
+					'dr_number' => $this->input->post('dr_no')
+				);
+				$adt->where('do_number', $DocNum);
+				$adt->update('phase2.dbo.FinalTransmital', $update);
+			}
+		}*/
+		
+		$sap = $this->load->database('db2', TRUE);
+		$query = "
+			SELECT (SELECT Name FROM [@TRUCKER]WHERE Code = A.U_Trucker) 'Truck', A.Address2, CONVERT(VARCHAR(10), A.DocDueDate, 101) as 'DocDueDate', A.CardName, A.DocNum,A.U_PONo, B.Quantity, B.unitMsr,B.Dscription, A.Comments FROM ODLN A 
+			INNER JOIN DLN1 B ON A.DocEntry = B.DocEntry
+			WHERE A.DocNum = '$DocNum'
+		";
+		$q = $sap->query($query);
+		if($q->num_rows() > 0){
+			foreach($q->result() as $row){
+				$data[] = $row;
+			}
+			return $data;
+		}
+		else{
+			return false;
+		}
+	}
+	
+	function whse_summary(){ 
+		$q = $this->db->get('mwhr');
+		if($q->num_rows() > 0){
+			foreach($q->result() as $row){
+				$data[] = $row;
+			}
+			return $data;
+		}
+		else{
+			return false;
+		}
+	}
+	
+	function whse_trn_summary(){ 
+		
+		$today = date("Y-m-d");
+		$from = $today.' 00:00:00';
+		$to = $today.' 23:59:59';
+		$in = 0;
+		$out = 0;
+		$tr_count = 0;
+		$email_content = '';
+					
+		foreach($this->whse_summary() as $row){
+			//return $row->wh_name;
+			$whse = 	$row->wh_name;	
+			/*$this->db->where('wh_name', $whse);			
+			$q = $this->db->get('whir');*/
+			$q = $this->db->query("
+				SELECT * FROM whir WHERE wh_name = '$whse' AND wi_createdatetime BETWEEN '$from' AND '$to'			
+			");
+			if($q->num_rows() > 0){
+				foreach($q->result() as $rows){
+					if($rows->wi_deltype == 'Delivery In'){
+        				$in = $in + $rows->wi_itemqty;
+        			}
+        			if($rows->wi_deltype == 'Delivery Out'){
+        				$out = $out + $rows->wi_itemqty;
+        			}
+        			$tr_count++;
+				}
+				$email_content .= $whse.' | <b> Transaction count: '.$tr_count.'</b><br />IN : '.$in.'<br />OUT : '.$out.'<br />';
+				$email_content .= "\n";
+        		//return 'work';
+			}
+			//if($tr_count > 0){ $email_content .= '<br />'; }
+       	$in = 0;
+       	$out = 0;
+       	$tr_count = 0;
+		}
+		
+		//$email = 'armand.layno@mnl.aaci.ph';
+		$email = array('armand.layno@mnl.aaci.ph','eric.almonte@aaci.ph','madona.nabejet@aaci.ph','logistics@aaci.ph','audit@aaci.ph');
+		//$email = 'armand.layno@mnl.aaci.ph','eric.almonte@aaci.ph','madona.nabejet@aaci.ph';
+		$this->email_config();
+		$this->email->from('web@mkt.aaci.ph', 'AACI WEB Inventory System');
+		$this->email->to($email);
+		$this->email->subject('Web based inventory Updates');
+		//$email_content = "Test email";
+		if(!$email_content == ''){
+			$email_content .= "To verify the availability of the stocks kindly logon to <a href='http://ict.aaci.ph/inventory'>Web Based Inventory</a>";
+			$this->email->message($email_content);
+			if(!$this->email->send()){
+				return show_error($this->email->print_debugger());
+			}else{ return 'email sent'; }
+		}
+		else{
+			return 'email content is null';
+		}
+	}
+}
+
+?>
