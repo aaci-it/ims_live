@@ -158,12 +158,14 @@ if($show_layout == 1){
   $date_today = date('Y-m-d');
   $datetime = date('Y-m-d h:i:s');
 
-  $pdf = new FPDF();
-  $pdf->AddPage();
-  new FPDF('P','mm','Letter');
+  $pdf = new FPDF('P','mm','Letter');
 
-  $pdf->SetFont('Helvetica', '', 13); $pdf->SetXY(140, 32); $pdf->Cell(40, 13, $refnum1, 0, 1); //160, 35
-  $pdf->SetFont('Helvetica', '', 11); $pdf->SetXY(140, 38); $pdf->Cell(40, 11, $deldate, 0, 1); //160, 40
+  $pdf->AddFont('Cambria', '', 'Cambria.php');
+
+  $pdf->AddPage();
+
+  $pdf->SetFont('Cambria', '', 13); $pdf->SetXY(140, 32); $pdf->Cell(40, 13, $refnum1, 0, 1); //160, 35
+  $pdf->SetFont('Cambria', '', 11); $pdf->SetXY(140, 38); $pdf->Cell(40, 11, $deldate, 0, 1); //160, 40
 
   $tcomp = "";
   if($trucker == "WEI"){
@@ -180,16 +182,16 @@ if($show_layout == 1){
 
   $donum = 'DO '.$refnum1;
 
-  $pdf->SetFont('Helvetica', '', 10); $pdf->SetXY(3, 69); $pdf->Cell(25, 10, $donum, 0, 1); //20, 68
-  $pdf->SetFont('Helvetica', '', 10); $pdf->SetXY(35, 69); $pdf->Cell(25, 10, $ponum, 0, 1); //58, 68
+  $pdf->SetFont('Cambria', '', 10); $pdf->SetXY(3, 69); $pdf->Cell(25, 10, $donum, 0, 1); //20, 68
+  $pdf->SetFont('Cambria', '', 10); $pdf->SetXY(35, 69); $pdf->Cell(25, 10, $ponum, 0, 1); //58, 68
   $pdf->SetFont('Helvetica', '', 10); $pdf->SetXY(70, 69); $pdf->Cell(40, 10, $custcode, 0, 1); //90, 68
   $pdf->SetFont('Helvetica', '', 10); $pdf->SetXY(130, 65); $pdf->Cell(40, 10, $dodate, 0, 1); // 140, 68
 
   $drnum = 'DR '.$refnum2;
   // $pdf->SetFont('Helvetica', '', 10); $pdf->SetXY(165, 69); $pdf->MultiCell(25, 25, $drnum, 'T', 'L'); // 186, 68
-  $pdf->SetFont('Helvetica', '', 10); $pdf->SetXY(160, 69); $pdf->Cell(40, 10, $drnum, 0, 1); // 140, 68
+  $pdf->SetFont('Cambria', '', 10); $pdf->SetXY(160, 69); $pdf->Cell(40, 10, $drnum, 0, 1); // 140, 68
 
-  $pdf->SetFont('Helvetica','', 13); $pdf->SetXY(3, 88); $pdf->Cell(45, 11, $item_qty, 0, 1); // 20, 92
+  $pdf->SetFont('Cambria','', 13); $pdf->SetXY(3, 88); $pdf->Cell(45, 11, $item_qty, 0, 1); // 20, 92
   $pdf->SetFont('Helvetica','', 13); $pdf->SetXY(55, 88); $pdf->Cell(15, 11, strtoupper($item_uom), 0, 1, 'C');
   $pdf->SetFont('Helvetica','', 13); $pdf->SetXY(85, 88); $pdf->Cell(55, 11,strtoupper($item_desc),0, 1);
 
@@ -206,11 +208,11 @@ if($show_layout == 1){
 
   $seal_1 = 'Seal No. : '.$seal;
 
-  $pdf->SetFont('Helvetica', '', 10); $pdf->SetXY(3, 98); $pdf->Cell(50, 10, $seal_1, 0, 1); // 25, 102
+  $pdf->SetFont('Cambria', '', 10); $pdf->SetXY(3, 98); $pdf->Cell(50, 10, $seal_1, 0, 1); // 25, 102
 
   $wbno_1 = 'Ref. wb : '.$wb;
 
-  $pdf->SetFont('Helvetica', '', 10); $pdf->SetXY(85, 98); $pdf->Cell(50, 10, $wbno_1, 0, 1);// 105, 102
+  $pdf->SetFont('Cambria', '', 10); $pdf->SetXY(85, 98); $pdf->Cell(50, 10, $wbno_1, 0, 1);// 105, 102
 
   $dtime_str = "DATE/TIME IN (CUSTOMER)";
 
@@ -240,7 +242,7 @@ $pdf->SetFont('Helvetica', '', 10); $pdf->SetXY(3, 108); $pdf->Cell(30, 10, $str
   $pdf->SetFont('Helvetica', 'B', 11); $pdf->SetXY(112, 120); $pdf->Cell(80, 11, $str_04, 0, 1, 'C'); // 130, 123
 
   $pdf->SetFont('Helvetica', '', 10); $pdf->SetXY(40, 120); $pdf->Cell(50, 10, $tdriver, 0, 1); // 40, 125
-  $pdf->SetFont('Helvetica', '', 10); $pdf->SetXY(40, 130); $pdf->Cell(55, 10, $tpnum, 0, 1); // 55, 135
+  $pdf->SetFont('Cambria', '', 10); $pdf->SetXY(40, 130); $pdf->Cell(55, 10, $tpnum, 0, 1); // 55, 135
 
   $str_05 = "TIME RECEIVED :";
   $str_06 = "DATE RECEIVED :";
@@ -251,7 +253,7 @@ $pdf->SetFont('Helvetica', '', 10); $pdf->SetXY(3, 108); $pdf->Cell(30, 10, $str
 
   $pdf->SetFont('Helvetica', '', 10); $pdf->SetXY(105, 137); $pdf->Cell(80, 10, $str_07, 0, 1); //125, 70
 
-  $pdf->SetFont('Helvetica', '', 10); $pdf->SetXY(40, 137); $pdf->Cell(80, 10, $datetime, 0, 1); // 40 ,70
+  $pdf->SetFont('Cambria', '', 10); $pdf->SetXY(40, 137); $pdf->Cell(80, 10, $datetime, 0, 1); // 40 ,70
 
   // $_SERVER['DOCUMENT_ROOT'].'/inventory/application/PRINT_DOCS/WIS/
   $filename=$_SERVER['DOCUMENT_ROOT'].'/inventory_live/application/PRINT_DOCS/DR/'.$wi_id.".pdf";
