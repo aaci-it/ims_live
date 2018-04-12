@@ -1,4 +1,4 @@
-<!DOCTYPE HTML>
+﻿<!DOCTYPE HTML>
 
 <html lang="en">
 	<head>
@@ -66,7 +66,7 @@
 					<div class="col-md-12">
 						<div class="logo"><img src="<?php echo base_url(); ?>images/aaci_logo_plain.png"></div>
 						<div class="panel panel-default">
-							<div class="panel-heading" style="background-color: #337ab7; color:white;"><strong>Inventory Management System</strong></div>
+							<div class="panel-heading" style="background-color: #337ab7; color:white;"><strong>Inventory Management System Dev</strong></div>
 							<div class="panel-body">
 
 								<p><strong><?php if(isset($error)){echo $error;} ?></strong></p>
