@@ -2,8 +2,6 @@
 
 <?php
 
-	// require($_SERVER['DOCUMENT_ROOT'].'/inventory_test/assets/fonts/Cambria.php');
-
 	function convert_number_to_words($number) {
     
 		$hyphen      = '-';
