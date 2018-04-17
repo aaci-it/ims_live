@@ -162,15 +162,15 @@ if($show_layout == 1){
 
 	$pdf->SetFont('Arial','', 10); $pdf->SetXY(100, 1); $pdf->Cell(50,10,$datetime,0, 1); // 120, 5
 
-	$pdf->SetFont('Arial', '', 13); $pdf->SetXY(145, 32); $pdf->Cell(50, 13, $refnum1, 0, 1); // 160, 40 
+	$pdf->SetFont('Cambria', '', 13); $pdf->SetXY(145, 32); $pdf->Cell(50, 13, $refnum1, 0, 1); // 160, 40 
 
-	$pdf->SetFont('Arial', '', 10); $pdf->SetXY(150, 38); $pdf->Cell(50, 10, $date_today, 0, 1); // 160, 40 
+	$pdf->SetFont('Cambria', '', 10); $pdf->SetXY(150, 38); $pdf->Cell(50, 10, $date_today, 0, 1); // 160, 40 
 	$pdf->SetFont('Arial', '', 13); $pdf->SetXY(30, 35); $pdf->Cell(85, 13, $custname, 0, 1); // 45, 40
 	$pdf->SetFont('Arial', '', 10); $pdf->SetXY(30, 42); $pdf->Cell(85, 10, $custaddr, 0, 1); // 45, 45
 
 	$iqty = '***'.$item_qty.'***'.'   '.$item_uom;
 
-	$pdf->SetFont('Arial', '', 13); $pdf->SetXY(3, 55); $pdf->Cell(55, 13, $iqty, 0, 1); //20, 60
+	$pdf->SetFont('Cambria', '', 13); $pdf->SetXY(3, 55); $pdf->Cell(55, 13, $iqty, 0, 1); //20, 60
 	$pdf->SetFont('Arial', '', 13); $pdf->SetXY(80, 55); $pdf->Cell(130, 13, strtoupper($item_desc), 0, 1); //85, 60
 		
 	$words = '( '.strtoupper(convert_number_to_words(sprintf('%g',$item_qty))). ' BAG(S) ONLY )';
@@ -191,13 +191,13 @@ if($show_layout == 1){
 	$pdf->SetFont('Arial', '', 10); $pdf->SetXY(100, 73); $pdf->Cell(55, 10, $gduty, 0, 1); // 100, 73
 
 	$ponum_1 = 'PO#: '.$po_num;
-	$pdf->SetFont('Arial', '', 10); $pdf->SetXY(110, 78); $pdf->Cell(55, 10, $ponum_1, 0, 1); // 100, 73
+	$pdf->SetFont('Cambria', '', 10); $pdf->SetXY(110, 78); $pdf->Cell(55, 10, $ponum_1, 0, 1); // 100, 73
 
 	$wbno_1 = 'WB#: '.$wb;
-	$pdf->SetFont('Arial', '', 10); $pdf->SetXY(110, 83); $pdf->Cell(55, 10, $wbno_1, 0, 1); // 100, 73
+	$pdf->SetFont('Cambria', '', 10); $pdf->SetXY(110, 83); $pdf->Cell(55, 10, $wbno_1, 0, 1); // 100, 73
 
 	$seal_1 = 'SEAL INTACT #: '.$seal;
-	$pdf->SetFont('Arial', '', 10); $pdf->SetXY(110, 88); $pdf->Cell(55, 10, $seal_1, 0, 1); // 100, 73
+	$pdf->SetFont('Cambria', '', 10); $pdf->SetXY(110, 88); $pdf->Cell(55, 10, $seal_1, 0, 1); // 100, 73
 
 	$str_04 = "DATE/TIME IN (CUSTOMER):";
 	$str_05 = "TIME RECEIVED:__________ DATE RECEIVED:__________";
@@ -207,7 +207,7 @@ if($show_layout == 1){
 
 	$pdf->SetFont('Arial', '', 12); $pdf->SetXY(20, 95); $pdf->Cell(60, 12, $trucker, 0, 1, 'C'); // 50, 95
 	$pdf->SetFont('Arial', '', 12); $pdf->SetXY(20, 100); $pdf->Cell(60, 12, $tdriver, 0, 1, 'C'); //50, 105
-	$pdf->SetFont('Arial','',12); $pdf->SetXY(120, 95); $pdf->Cell(75, 12, $tpnum, 0, 1, 'C'); // 145, 95
+	$pdf->SetFont('Cambria','',12); $pdf->SetXY(120, 95); $pdf->Cell(75, 12, $tpnum, 0, 1, 'C'); // 145, 95
 	$pdf->SetFont('Arial','',12); $pdf->SetXY(120, 100); $pdf->Cell(75, 12, $from, 0, 1, 'C'); // 145, 105
 
 	// $_SERVER['DOCUMENT_ROOT'].'/inventory/application/PRINT_DOCS/WIS/
