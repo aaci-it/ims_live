@@ -154,13 +154,11 @@ if($show_layout == 1){
 	$date_today = date('Y-m-d');
 	$datetime = date('Y-m-d h:i:s');
 	
-	$pdf = new FPDF();
-	$pdf->AddPage();
-	new FPDF('P','mm','Letter');
-	
-	// makeFont(echo base_url().'assets/fonts/Cambria.ttf','cp1252');
+	$pdf = new FPDF('P','mm','Letter');
 
-	// $pdf->AddFont('Cambria','', $_SERVER['DOCUMENT_ROOT'].'/inventory_test/assets/fonts/Cambria.php');
+	$pdf->AddFont('Cambria', '', 'Cambria.php');
+	$pdf->AddPage();
+	
 
 	$pdf->SetFont('Arial','', 10); $pdf->SetXY(100, 1); $pdf->Cell(50,10,$datetime,0, 1); // 120, 5
 
