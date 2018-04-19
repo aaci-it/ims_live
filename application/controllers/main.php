@@ -1448,7 +1448,8 @@
 									'refnum2'=>$rcd->wi_refnum2
 
 								);
-
+								
+								// ENTRY DATA DR FOR DSPR
 								$this->usermodel->dspr_dout_dr($dout_rec_dr);
 
 								// CREATE JSON FILES
@@ -6640,6 +6641,12 @@
 	function babylyn() {
 		echo "BABY LYN MANALO";
 	} 
+	
+	function insert_data()
+	{
+		return 'sample'; die;
+		$this->usermodel->temp_insert_sap_do_data();
+	}
 
 }
 

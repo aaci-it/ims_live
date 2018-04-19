@@ -12004,6 +12004,230 @@ CASE WHEN d.rqty IS NULL THEN 0 ELSE d.rqty END AS delres
 		}
 
 	}
+	
+	function temp_insert_sap_do_data()
+	{
+		$db3 = $this->load->database('db3', TRUE);
+	
+		$donum = '148820';
+
+			$db3 = $this->load->database('db3',TRUE);
+			$db3->where('a.U_DoNo', (int)$donum);
+			$db3->where('a.DocStatus', 'O');
+			$db3->where('a.DocType', 'I');
+			$db3->where('a.Printed', 'Y');
+			$db3->where('c.U_Commodity', '02');
+			$db3->where('b.WhsCode', '120202');
+			$db3->where('a.DocDate > ', '2016-10-05');
+
+			$db3->select("CAST(a.DocDate AS DATE) AS Dodate,
+							  CAST(a.DocDueDate AS DATE) AS SAPExpDeldate,
+							  DATEDIFF(dd, CAST(a.DocDate AS DATE), CAST(a.DocDueDate AS DATE)) AS DateGap,
+							  a.DocNum AS DONo,
+							  a.Series,
+							  a.U_DRNo AS DefDocType,
+
+							  CASE 
+							  WHEN a.U_TransDate IS NULL
+							  THEN '1900-01-01'
+							  ELSE CAST(a.U_TransDate AS DATE)
+							  END 'TransmitDate',
+
+							  CASE 
+							  WHEN a.U_DOTransDate IS NULL
+							  THEN '1900-01-01' 
+							  ELSE CAST(a.U_DOTransDate AS DATE)
+							  END 'U_DOTransDate',
+
+							  a.DocStatus,
+							  a.CardCode,
+							  a.CardName,
+
+							  CASE
+							  WHEN a.NumatCard IS NULL
+							  THEN '' 
+							  ELSE a.NumatCard
+							  END 'PepsiSDRNo',
+
+							  CASE
+							  WHEN a.Address2 IS NULL
+							  THEN ''
+							  ELSE a.Address2
+							  END 'Location',
+
+							  CASE
+							  WHEN a.U_PONo IS NULL
+							  THEN ''
+							  ELSE a.U_PONo
+							  END 'MotherPO',
+
+							  CASE
+							  WHEN a.Comments IS NULL
+							  THEN '' 
+							  ELSE a.Comments
+							  END 'DoRemarks',
+
+							  CASE
+							  WHEN a.UpdateDate IS NULL
+							  THEN '1900-01-01' 
+							  ELSE CAST(a.UpdateDate AS DATE)
+							  END 'UpdateDate',
+
+							  a.DocEntry,
+							  a.ObjType,
+							  
+							  b.LineNum,
+							  b.WhsCode,
+
+							  CASE
+							  WHEN b.U_SAdockey IS NULL
+							  THEN '0'
+							  ELSE b.U_SAdockey
+							  END 'U_SAdockey',
+
+							  CASE
+							  WHEN b.U_SADocNo IS NULL
+							  THEN '0'
+							  ELSE b.U_SADocNo
+							  END 'U_SADocNo',
+
+							  CASE
+							  WHEN b.U_SADocLine1 IS NULL
+							  THEN '0'
+							  ELSE b.U_SADocLine1
+							  END 'U_SADocLine1',
+
+							  CASE 
+							  WHEN b.U_SATransNo IS NULL
+							  THEN '0'
+							  ELSE b.U_SATransNo
+							  END 'U_SATransNo',
+
+							  b.U_SATransTyp,
+							  b.ItemCode,
+							  b.Dscription,
+							  b.UnitMsr,
+							  b.Quantity AS DoQty,
+
+							  CASE
+							  WHEN b.OpenCreQty IS NULL
+							  THEN '0'
+							  ELSE b.OpenCreQty
+							  END 'B1UnservedQty',
+
+							  (b.Quantity - b.OpenCreQty) AS Served,
+
+							  b.U_PONo AS TransPO,
+
+							  CASE 
+							  WHEN b.LineNum IS NULL
+							  THEN '' 
+							  ELSE b.LineNum
+							  END 'BaseLine',
+
+							  CASE
+							  WHEN a.DocEntry IS NULL
+							  THEN '' 
+							  ELSE a.DocEntry
+							  END 'BaseEntry',
+
+							  CASE
+							  WHEN b.ObjType IS NULL
+							  THEN ''
+							  ELSE b.ObjType
+							  END 'BaseType',
+
+							  d.SlpCode,
+
+							  e.WhsName AS Source,
+							  e.U_Whse_Type,
+
+							  f.SlpName AS AE,
+
+							  g.Code AS TruckCode,
+							  g.Name AS TruckCo,
+
+							  a.U_DoNo
+							  
+							");
+
+			$db3->from('ORDR a');
+			$db3->join('RDR1 b', 'b.DocEntry = a.DocEntry', 'INNER');
+			$db3->join('OITM c', 'c.ItemCode = b.ItemCode', 'INNER');
+			$db3->join('OCRD d', 'd.CardCode = a.CardCode','INNER');
+			$db3->join('OWHS e', 'e.WhsCode = b.WhsCode', 'INNER');
+			$db3->join('OSLP f', 'f.SlpCode = d.SlpCode', 'LEFT');
+			$db3->join('dbo.[@TRUCKERS] g', 'g.Code = a.U_Trucker', 'LEFT');
+				
+			$qry3 = $db3->get();
+
+			if ($qry3->num_rows() > 0) {
+				
+				return 'GOOD'; die;
+
+					foreach ($qry3->result_array() as $r3) {
+
+						$qry4 = $this->db->where('do_no', $r3['DONo'])
+								->get('sap_do_data');
+
+						if ($qry4->num_rows() == 0) {
+
+							$data = array(
+								'doc_entry'=>$r3['DocEntry'],
+								'obj_type'=>$r3['ObjType'],
+								'line_num'=>$r3['LineNum'],
+								'do_date'=>$r3['Dodate'],
+								'sap_exp_del_date'=>$r3['SAPExpDeldate'],
+								'date_gap'=>$r3['DateGap'],
+								'do_no'=>$r3['DONo'],
+								'series'=>$r3['Series'],
+								'def_doc_type'=>$r3['DefDocType'],
+								'transmit_date'=>$r3['TransmitDate'],
+								'do_transmit_date'=>$r3['U_DOTransDate'],
+								'do_stat'=>$r3['DocStatus'],
+								'card_code'=>$r3['CardCode'],
+								'card_name'=>$r3['CardName'],
+								'sdr_no'=>$r3['PepsiSDRNo'],
+								'location'=>$r3['Location'],
+								'mother_po'=>$r3['MotherPO'],
+								'truck_code'=>$r3['TruckCode'],
+								'truck_company'=>$r3['TruckCo'],
+								'whse_code'=>$r3['WhsCode'],
+								'source'=>$r3['Source'],
+								'whse_type'=>$r3['U_Whse_Type'],
+								'item_code'=>$r3['ItemCode'],
+								'item_desc'=>$r3['Dscription'],
+								'uom'=>$r3['UnitMsr'],
+								'do_qty'=>$r3['DoQty'],
+								'b1_udo_qty'=>$r3['B1UnservedQty'],
+								'served_qty'=>$r3['Served'],
+								'trans_po'=>$r3['TransPO'],
+								'base_line'=>$r3['BaseLine'],
+								'base_entry'=>$r3['BaseEntry'],
+								'base_type'=>$r3['BaseType'],
+								'ae_code'=>$r3['SlpCode'],
+								'ae'=>$r3['AE'],
+								'do_remarks'=>$r3['DoRemarks'],
+								'update_date'=>$r3['UpdateDate'],
+								'sa_dockey'=>$r3['U_SAdockey'],
+								'sa_docno'=>$r3['U_SADocNo'],
+								'sa_docline'=>$r3['U_SADocLine1'],
+								'sa_transno'=>$r3['U_SATransNo'],
+								'sa_transtype'=>$r3['U_SATransTyp'],
+								'dbtype'=>'1',
+								'u_do'=>$r3['U_DoNo']
+							);
+
+							$this->db->insert('sap_do_data', $data);
+						}
+
+					}
+
+					return TRUE;
+
+			} else {return "BAD"; die;}
+		
+	}
 
 
 }
