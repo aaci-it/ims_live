@@ -3427,51 +3427,32 @@
 
 						if($sub_type_del_in == "DI_04"){
 							if($this->input->post("doctype1") == "DO" AND $this->input->post("doctype2") == "DR"){
+
 								$this->usermodel->bp_upload();
 								$this->usermodel->SAP_item_add();
-								$this->usermodel->home_wh_add();
-
+								$this->usermodel->home_wh_add(); 
+								
 								$this->usermodel->di_nappr();
 
 								$this->b_model->send_delivery_in();
-								
+									
 								$this->usermodel->truck_add();
 								$this->usermodel->uom_add();
 
-								// if($this->input->post('doctype1') == "RR" OR $this->input->post('doctype2') == "RR"){
-								// 	$doc_type = "/din_01_RR";
-								// 	redirect('main/wh_delivery_item_in/'.$this->input->post('wh_code_din').$doc_type);
-								// }else{
-								// 	$doc_type = "/din_01_RR";
-								// 	redirect('main/wh_delivery_item_in/'.$this->input->post('wh_code_din').$doc_type);
-								// }
-								
+								if($this->input->post('doctype1') == "RR" OR $this->input->post('doctype2') == "RR"){
+									$doc_type = "/din_01_RR";
+									redirect('main/wh_delivery_item_in/'.$this->input->post('wh_code_din').$doc_type);
+								}else{
+									$doc_type = "/din_01_RR";
+									redirect('main/wh_delivery_item_in/'.$this->input->post('wh_code_din').$doc_type);
+								}
+
 							}else{
 								$data['error']="Reference Type 1 must be DO and Reference Type 2 must be DR";
 								$this->load->view('header',$data);
 								$this->load->view('main/wh_del_items_in',$data);
 							}
-
-							// IN FOR OTHER REFERENCES
-							$this->usermodel->bp_upload();
-							$this->usermodel->SAP_item_add();
-							$this->usermodel->home_wh_add();
-
-							$this->usermodel->di_nappr();
-
-							$this->b_model->send_delivery_in();
-								
-							$this->usermodel->truck_add();
-							$this->usermodel->uom_add();
-
-							if($this->input->post('doctype1') == "RR" OR $this->input->post('doctype2') == "RR"){
-								$doc_type = "/din_01_RR";
-								redirect('main/wh_delivery_item_in/'.$this->input->post('wh_code_din').$doc_type);
-							}else{
-								$doc_type = "/din_01_RR";
-								redirect('main/wh_delivery_item_in/'.$this->input->post('wh_code_din').$doc_type);
-							}
-
+							
 						}else{
 							$this->usermodel->bp_upload();
 							$this->usermodel->SAP_item_add();
