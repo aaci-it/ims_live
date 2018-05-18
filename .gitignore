@@ -1,0 +1,10 @@
+# Ignore DR/WIS PDF Files
+*.pdf
+
+#Ignore JSON Files
+*.json
+
+#Ignore Folders
+_JSON_FILES/
+_PRINT_DOCS/
+_SUCCESS_JSON/
