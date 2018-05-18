@@ -5,6 +5,6 @@
 *.json
 
 #Ignore Folders
-_JSON_FILES/
-_PRINT_DOCS/
-_SUCCESS_JSON/
+application/JSON_FILES
+application/PRINT_DOCS
+application/SUCCESS_JSON
